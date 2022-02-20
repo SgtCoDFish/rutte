@@ -3,12 +3,15 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -92,16 +95,19 @@ func process(knownReplacements replaceMap, inpath string, outpath string) fs.Wal
 
 		body := parts[2]
 
+		bodyOut := strings.Builder{}
+
 		scanner := bufio.NewScanner(bytes.NewReader(body))
 
 		// For each line in the file, check if it needs replacement
 		// If it does, check if we already know the replacement in our cache and use that if so
 		// If we don't, ask the user to give a replacement and then cache it.
 		for scanner.Scan() {
-			line := scanner.Bytes()
+			line := append(scanner.Bytes(), byte('\n'))
 			lineHash := hashOf(line)
 
 			if !blockNeedsReplacement(line) {
+				bodyOut.Write(line)
 				continue
 			}
 
@@ -111,15 +117,135 @@ func process(knownReplacements replaceMap, inpath string, outpath string) fs.Wal
 				log.Printf("need to replace: %s (%s)", line, lineHash)
 			}
 
-			knownReplacements[lineHash] = string(line)
+			if known, exists := knownReplacements[lineHash]; exists {
+				bodyOut.WriteString(known)
+			} else {
+				newBody, err := promptForEdit(line)
+				if err != nil {
+					return fmt.Errorf("failed to get updated value for line: %w", err)
+				}
+
+				bodyOut.Write(newBody)
+
+				knownReplacements[lineHash] = string(newBody)
+			}
+		}
+
+		output := strings.Join([]string{"", string(parts[1]), bodyOut.String()}, "---")
+
+		err = os.WriteFile(targetPath, []byte(output), 0o664)
+		if err != nil {
+			return fmt.Errorf("failed to write %q: %w", targetPath, err)
 		}
 
 		return nil
 	}
 }
 
+func promptForEdit(input []byte) ([]byte, error) {
+	editorBinary, err := resolveEditor()
+	if err != nil {
+		return nil, err
+	}
+
+	tempDir, err := os.MkdirTemp(os.TempDir(), "rutte-fix-*")
+	if err != nil {
+		return nil, fmt.Errorf("failed to create temp dir: %w", err)
+	}
+
+	defer func() {
+		err := os.RemoveAll(tempDir)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to remove temp dir: %s\n", tempDir)
+		}
+	}()
+
+	tmpFilename := filepath.Join(tempDir, "rutte")
+
+	err = os.WriteFile(tmpFilename, input, 0o600)
+	if err != nil {
+		return nil, fmt.Errorf("failed to write %s: %w", tmpFilename, err)
+	}
+
+	editorCmd := exec.CommandContext(context.TODO(), editorBinary, tmpFilename)
+
+	editorCmd.Stdin = os.Stdin
+	editorCmd.Stdout = os.Stdout
+	editorCmd.Stderr = os.Stderr
+
+	err = editorCmd.Start()
+	if err != nil {
+		return nil, fmt.Errorf("failed to run editor %q: %w", editorBinary, err)
+	}
+
+	err = editorCmd.Wait()
+	if err != nil {
+		return nil, fmt.Errorf("failed to wait for editor %q: %w", editorBinary, err)
+	}
+
+	newContents, err := os.ReadFile(tmpFilename)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read %q: %w", tmpFilename, err)
+	}
+
+	return newContents, nil
+}
+
+func resolveEditor() (string, error) {
+	editorEnv, exists := os.LookupEnv("EDITOR")
+	if exists {
+		return editorEnv, nil
+	}
+
+	for _, name := range []string{"vim", "vi", "nvim", "nano", "emacs"} {
+		path, err := exec.LookPath(name)
+		if err == nil {
+			return path, nil
+		}
+	}
+
+	return "", fmt.Errorf("couldn't find $EDITOR or any known editor in the $PATH")
+}
+
+func loadReplacements(filename string) (replaceMap, error) {
+	var out replaceMap
+
+	contents, err := os.ReadFile(filename)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return make(replaceMap), nil
+		}
+
+		return nil, err
+	}
+
+	err = json.Unmarshal(contents, &out)
+	if err != nil {
+		return nil, err
+	}
+
+	return out, nil
+}
+
+func writeReplacements(filename string, knownReplacements replaceMap) error {
+	out, err := json.Marshal(knownReplacements)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(filename, out, 0o664)
+	return err
+}
+
 func main() {
-	knownReplacements := make(replaceMap)
+	replacementsFile := "replacements.json"
+	knownReplacements, err := loadReplacements(replacementsFile)
+	if err != nil {
+		log.Printf("failed to load %q: %s", replacementsFile, err)
+	}
+
+	defer writeReplacements(replacementsFile, knownReplacements)
+
 	if err := filepath.WalkDir(inpath, process(knownReplacements, inpath, outpath)); err != nil {
 		log.Printf("failed to process: %s", err.Error())
 		os.Exit(1)
