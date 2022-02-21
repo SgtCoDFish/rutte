@@ -1,0 +1,6 @@
+{
+  "aboutjetstack/_index.md": "About Jetstack, the originating company for cert-manager",
+  "cli/_index.md": "cert-manager CLI documentation",
+  "cli/acmesolver.md": "cert-manager ACME solver CLI documentation",
+  "docs/_index.md": "cert-manager Documentation"
+}

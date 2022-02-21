@@ -2,3 +2,8 @@
 fresh:
 	rm -rf content content-out
 	cp -r /home/ashley/workspace/cert-manager-website/content ./content
+
+
+.PHONY: test
+test:
+	go test -count=1 ./...

@@ -14,16 +14,26 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
+
+type replaceMap map[string]string
+type descriptionMap map[string]string
 
 const inpath = "content/en/"
 const outpath = "content-out/"
 
 const verbose = true
 
-var replacementCount int = 0
+const breakNum = 2
 
-type replaceMap map[string]string
+var (
+	replacementCount int = 0
+	filesProcessed   int = 0
+
+	skip bool = false
+)
 
 func blockNeedsReplacement(block []byte) bool {
 	if bytes.Index(block, []byte("{{%")) != -1 {
@@ -34,20 +44,24 @@ func blockNeedsReplacement(block []byte) bool {
 		return true
 	}
 
+	if bytes.Index(block, []byte("./")) != -1 {
+		return true
+	}
+
 	return false
 }
 
-func hashOf(block []byte) string {
-	hash := sha256.Sum256(block)
-	return hex.EncodeToString(hash[:])
-}
-
-func process(knownReplacements replaceMap, inpath string, outpath string) fs.WalkDirFunc {
+func process(knownReplacements replaceMap, knownDescriptions descriptionMap, inpath string, outpath string) fs.WalkDirFunc {
 	return func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return fmt.Errorf("got an error for %q: %w", path, err)
 		}
 
+		if skip {
+			return nil
+		}
+
+		versionIndependentPath := deriveVersionIndependentPath(path)
 		targetPath := strings.Replace(path, inpath, outpath, 1)
 
 		if d.IsDir() {
@@ -58,6 +72,22 @@ func process(knownReplacements replaceMap, inpath string, outpath string) fs.Wal
 			}
 
 			return nil
+		}
+
+		if filesProcessed > 0 && filesProcessed%breakNum == 0 {
+			log.Printf("%d files processed; type y to break early, or anything else to continue", breakNum)
+			in := bufio.NewReader(os.Stdin)
+			response, _ := in.ReadString('\n')
+			response = strings.ToLower(response)
+			if len(response) >= 1 && response[0] == 'y' {
+				skip = true
+				return nil
+			}
+		}
+
+		fileBase := filepath.Base(targetPath)
+		if fileBase == "_index.md" {
+			targetPath = filepath.Join(filepath.Dir(targetPath), "README.md")
 		}
 
 		contents, err := os.ReadFile(path)
@@ -93,6 +123,12 @@ func process(knownReplacements replaceMap, inpath string, outpath string) fs.Wal
 			return fmt.Errorf("invalid preheader in %q; wanted whitespace only but got %q", path, preHeader)
 		}
 
+		header := parts[1]
+		documentTitle, err := deriveTitle(header)
+		if err != nil {
+			return fmt.Errorf("failed to find title in header block for %q: %w", path, err)
+		}
+
 		body := parts[2]
 
 		bodyOut := strings.Builder{}
@@ -114,35 +150,102 @@ func process(knownReplacements replaceMap, inpath string, outpath string) fs.Wal
 			replacementCount += 1
 
 			if verbose {
-				log.Printf("need to replace: %s (%s)", line, lineHash)
+				log.Printf("need to replace: %q (%s)", strings.TrimSpace(string(line)), lineHash)
 			}
 
 			if known, exists := knownReplacements[lineHash]; exists {
+				if verbose {
+					log.Printf("using cached replacement for %s", lineHash)
+				}
+
 				bodyOut.WriteString(known)
 			} else {
-				newBody, err := promptForEdit(line)
+				newBody, err := promptForEdit(path, line)
 				if err != nil {
 					return fmt.Errorf("failed to get updated value for line: %w", err)
 				}
 
-				bodyOut.Write(newBody)
+				_, _ = bodyOut.Write(newBody)
 
 				knownReplacements[lineHash] = string(newBody)
+
+				if verbose {
+					log.Printf("added new cached replacement for %s", lineHash)
+				}
 			}
 		}
 
-		output := strings.Join([]string{"", string(parts[1]), bodyOut.String()}, "---")
+		completeBody := bodyOut.String()
+
+		var documentDescription string
+
+		if knownDescription, exists := knownDescriptions[versionIndependentPath]; exists {
+			documentDescription = knownDescription
+		} else {
+			const splitter = "\n>>>>>\n"
+			// anything before the first >>>>> will be used as the description
+			promptBody := splitter + completeBody
+			newDescription, err := promptForEdit(path, []byte(promptBody))
+			if err != nil {
+				return fmt.Errorf("failed to get description for %q: %w", path, err)
+			}
+
+			splitPrompt := bytes.SplitN(newDescription, []byte(splitter), 2)
+			if len(splitPrompt) != 2 {
+				return fmt.Errorf("invalid description input for %q", path)
+			}
+
+			documentDescription = string(splitPrompt[0])
+			knownDescriptions[versionIndependentPath] = documentDescription
+		}
+
+		headerOut := PageHeader{
+			Title:       documentTitle,
+			Description: documentDescription,
+		}
+
+		output := strings.Join([]string{"", "---" + headerOut.String(), completeBody}, "---")
 
 		err = os.WriteFile(targetPath, []byte(output), 0o664)
 		if err != nil {
 			return fmt.Errorf("failed to write %q: %w", targetPath, err)
 		}
 
+		filesProcessed += 1
+
 		return nil
 	}
 }
 
-func promptForEdit(input []byte) ([]byte, error) {
+func main() {
+	replacementsFile := "replacements.json"
+	descriptionsFile := "descriptions.json"
+
+	knownReplacements, err := loadReplacements(replacementsFile)
+	if err != nil {
+		log.Printf("failed to load %q: %s", replacementsFile, err)
+	}
+
+	knownDescriptions, err := loadDescriptions(descriptionsFile)
+	if err != nil {
+		log.Printf("failed to load %q: %s", descriptionsFile, err)
+	}
+
+	defer writeReplacements(replacementsFile, knownReplacements)
+	defer writeDescriptions(descriptionsFile, knownDescriptions)
+
+	if err := filepath.WalkDir(inpath, process(knownReplacements, knownDescriptions, inpath, outpath)); err != nil {
+		log.Printf("failed to process: %s", err.Error())
+		os.Exit(1)
+	}
+
+	log.Printf("%d replacements total", replacementCount)
+	log.Printf("%d unique replacements", len(knownReplacements))
+}
+
+// util functions
+
+func promptForEdit(originalFilename string, input []byte) ([]byte, error) {
 	editorBinary, err := resolveEditor()
 	if err != nil {
 		return nil, err
@@ -160,7 +263,8 @@ func promptForEdit(input []byte) ([]byte, error) {
 		}
 	}()
 
-	tmpFilename := filepath.Join(tempDir, "rutte")
+	sanitizedOriginal := strings.ReplaceAll(originalFilename, "/", "-") + "-rutte"
+	tmpFilename := filepath.Join(tempDir, sanitizedOriginal)
 
 	err = os.WriteFile(tmpFilename, input, 0o600)
 	if err != nil {
@@ -197,7 +301,7 @@ func resolveEditor() (string, error) {
 		return editorEnv, nil
 	}
 
-	for _, name := range []string{"vim", "vi", "nvim", "nano", "emacs"} {
+	for _, name := range []string{"vim", "vi", "nvim"} {
 		path, err := exec.LookPath(name)
 		if err == nil {
 			return path, nil
@@ -228,7 +332,7 @@ func loadReplacements(filename string) (replaceMap, error) {
 }
 
 func writeReplacements(filename string, knownReplacements replaceMap) error {
-	out, err := json.Marshal(knownReplacements)
+	out, err := json.MarshalIndent(knownReplacements, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -237,20 +341,80 @@ func writeReplacements(filename string, knownReplacements replaceMap) error {
 	return err
 }
 
-func main() {
-	replacementsFile := "replacements.json"
-	knownReplacements, err := loadReplacements(replacementsFile)
+func loadDescriptions(filename string) (descriptionMap, error) {
+	var out descriptionMap
+
+	contents, err := os.ReadFile(filename)
 	if err != nil {
-		log.Printf("failed to load %q: %s", replacementsFile, err)
+		if os.IsNotExist(err) {
+			return make(descriptionMap), nil
+		}
+
+		return nil, err
 	}
 
-	defer writeReplacements(replacementsFile, knownReplacements)
-
-	if err := filepath.WalkDir(inpath, process(knownReplacements, inpath, outpath)); err != nil {
-		log.Printf("failed to process: %s", err.Error())
-		os.Exit(1)
+	err = json.Unmarshal(contents, &out)
+	if err != nil {
+		return nil, err
 	}
 
-	log.Printf("%d replacements total", replacementCount)
-	log.Printf("%d unique replacements", len(knownReplacements))
+	return out, nil
+}
+
+func writeDescriptions(filename string, knownDescriptions descriptionMap) error {
+	out, err := json.MarshalIndent(knownDescriptions, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(filename, out, 0o664)
+	return err
+}
+
+func hashOf(block []byte) string {
+	hash := sha256.Sum256(block)
+	return hex.EncodeToString(hash[:])
+}
+
+func deriveTitle(header []byte) (string, error) {
+	scanner := bufio.NewScanner(bytes.NewReader(header))
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		parts := strings.SplitN(line, ":", 2)
+		if len(parts) != 2 {
+			continue
+		}
+
+		prefix := parts[0]
+
+		if strings.ToLower(prefix) != "title" {
+			continue
+		}
+
+		title := strings.Trim(strings.TrimSpace(parts[1]), `"`)
+		return title, nil
+	}
+
+	return "", fmt.Errorf("couldn't find a 'title:' in header")
+}
+
+type PageHeader struct {
+	Title       string `yaml:"title"`
+	Description string `yaml:"description"`
+}
+
+func (p *PageHeader) String() string {
+	out, _ := yaml.Marshal(p)
+
+	return string(out)
+}
+
+func deriveVersionIndependentPath(path string) string {
+	fullDir, file := filepath.Split(path)
+
+	parts := strings.Split(strings.TrimRight(fullDir, "/"), "/")
+
+	return filepath.Join(parts[len(parts)-1], file)
 }
