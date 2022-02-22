@@ -26,7 +26,7 @@ const outpath = "content-out/"
 
 const verbose = true
 
-const breakNum = 2
+const breakNum = 15
 
 var (
 	replacementCount int = 0
