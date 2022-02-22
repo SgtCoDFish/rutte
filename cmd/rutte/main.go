@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -26,7 +27,9 @@ const outpath = "content-out/"
 
 const verbose = true
 
-const breakNum = 15
+// set breakNum to a positive number to get prompted if you want to take a break
+// after breakNum files have been processed
+const breakNum = 1
 
 var (
 	replacementCount int = 0
@@ -74,7 +77,7 @@ func process(knownReplacements replaceMap, knownDescriptions descriptionMap, inp
 			return nil
 		}
 
-		if filesProcessed > 0 && filesProcessed%breakNum == 0 {
+		if breakNum > 0 && filesProcessed > 0 && filesProcessed%breakNum == 0 {
 			log.Printf("%d files processed; type y to break early, or anything else to continue", breakNum)
 			in := bufio.NewReader(os.Stdin)
 			response, _ := in.ReadString('\n')
@@ -83,11 +86,6 @@ func process(knownReplacements replaceMap, knownDescriptions descriptionMap, inp
 				skip = true
 				return nil
 			}
-		}
-
-		fileBase := filepath.Base(targetPath)
-		if fileBase == "_index.md" {
-			targetPath = filepath.Join(filepath.Dir(targetPath), "README.md")
 		}
 
 		contents, err := os.ReadFile(path)
@@ -109,6 +107,15 @@ func process(knownReplacements replaceMap, knownDescriptions descriptionMap, inp
 			return nil
 		}
 
+		if filepath.Base(targetPath) == "_index.md" {
+			targetPath = filepath.Join(filepath.Dir(targetPath), "README.md")
+		}
+
+		// docsDir is "docs", "v1.0-docs", "next-docs", etc
+		docsDir := "/" + strings.TrimPrefix(targetPath, outpath)
+
+		log.Println("docsDir: " + docsDir)
+
 		// Separate the header, which is in a block starting and ending with "---"
 		parts := bytes.SplitN(contents, []byte("---"), 3)
 		if len(parts) != 3 {
@@ -124,9 +131,9 @@ func process(knownReplacements replaceMap, knownDescriptions descriptionMap, inp
 		}
 
 		header := parts[1]
-		documentTitle, err := deriveTitle(header)
+		inputHeader, err := ParseInputHeader(header)
 		if err != nil {
-			return fmt.Errorf("failed to find title in header block for %q: %w", path, err)
+			return fmt.Errorf("failed to parse header block for %q: %w", path, err)
 		}
 
 		body := parts[2]
@@ -175,7 +182,7 @@ func process(knownReplacements replaceMap, knownDescriptions descriptionMap, inp
 			}
 		}
 
-		completeBody := bodyOut.String()
+		completeBody := strings.TrimSpace(bodyOut.String())
 
 		var documentDescription string
 
@@ -200,11 +207,11 @@ func process(knownReplacements replaceMap, knownDescriptions descriptionMap, inp
 		}
 
 		headerOut := PageHeader{
-			Title:       documentTitle,
+			Title:       inputHeader.Title,
 			Description: documentDescription,
 		}
 
-		output := strings.Join([]string{"", "---" + headerOut.String(), completeBody}, "---")
+		output := headerOut.String() + completeBody
 
 		err = os.WriteFile(targetPath, []byte(output), 0o664)
 		if err != nil {
@@ -376,8 +383,43 @@ func hashOf(block []byte) string {
 	return hex.EncodeToString(hash[:])
 }
 
-func deriveTitle(header []byte) (string, error) {
+// InputHeader is a struct parsed from a hugo-style header
+type InputHeader struct {
+	Title     string `yaml:"title"`
+	LinkTitle string `yaml:"linkTitle"`
+	Weight    int64  `yaml:"weight"`
+}
+
+func ParseInputHeader(header []byte) (InputHeader, error) {
+	var out InputHeader
+
+	err := yaml.Unmarshal(header, &out)
+	if err != nil {
+		return InputHeader{}, fmt.Errorf("failed to parse header as YAML: %w", err)
+	}
+
+	if out.Title == "" {
+		return InputHeader{}, fmt.Errorf("missing title in header")
+	}
+
+	if out.LinkTitle == "" {
+		out.LinkTitle = out.Title
+	}
+
+	if out.Weight == 0 {
+		out.Weight = 9999
+	}
+
+	return out, nil
+}
+
+func deriveTitleAndWeight(header []byte) (string, int64, error) {
 	scanner := bufio.NewScanner(bytes.NewReader(header))
+
+	var title string
+
+	// some docs don't have weights, so we weight them really high as a default
+	var weight int64 = 9999
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -387,28 +429,43 @@ func deriveTitle(header []byte) (string, error) {
 			continue
 		}
 
-		prefix := parts[0]
+		prefix := strings.ToLower(parts[0])
 
-		if strings.ToLower(prefix) != "title" {
+		if prefix != "title" && prefix != "weight" {
 			continue
 		}
 
-		title := strings.Trim(strings.TrimSpace(parts[1]), `"`)
-		return title, nil
+		suffix := strings.TrimSpace(parts[1])
+		suffix = strings.Trim(suffix, `"'`)
+
+		if prefix == "title" {
+			title = suffix
+		} else if prefix == "weight" {
+			var err error
+
+			weight, err = strconv.ParseInt(suffix, 10, 0)
+			if err != nil {
+				return "", 0, fmt.Errorf("failed to parse weight %q: %w", parts[1], err)
+			}
+		}
 	}
 
-	return "", fmt.Errorf("couldn't find a 'title:' in header")
+	if title != "" {
+		return title, weight, nil
+	}
+
+	return "", 0, fmt.Errorf("couldn't find a 'title:' in header")
 }
 
 type PageHeader struct {
 	Title       string `yaml:"title"`
-	Description string `yaml:"description"`
+	Description string `yaml:"description,flow"`
 }
 
 func (p *PageHeader) String() string {
 	out, _ := yaml.Marshal(p)
 
-	return string(out)
+	return "---\n" + string(out) + "---\n\n"
 }
 
 func deriveVersionIndependentPath(path string) string {
