@@ -13,23 +13,31 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strconv"
 	"strings"
 
+	"github.com/SgtCoDFish/rutte"
 	"gopkg.in/yaml.v3"
 )
 
+type metadataMap map[string]rutte.ManifestMetadata
 type replaceMap map[string]string
 type descriptionMap map[string]string
 
-const inpath = "content/en/"
-const outpath = "content-out/"
+const (
+	inpath  = "content/en/"
+	outpath = "content-out/"
 
-const verbose = true
+	replacementsFile = "replacements.json"
+	descriptionsFile = "descriptions.json"
 
-// set breakNum to a positive number to get prompted if you want to take a break
-// after breakNum files have been processed
-const breakNum = 1
+	metadataFile = "metadata.json"
+
+	verbose = true
+
+	// breakNum can be set to a positive number to get prompted if you want to take a break
+	// after breakNum files have been processed
+	breakNum = -1
+)
 
 var (
 	replacementCount int = 0
@@ -54,7 +62,7 @@ func blockNeedsReplacement(block []byte) bool {
 	return false
 }
 
-func process(knownReplacements replaceMap, knownDescriptions descriptionMap, inpath string, outpath string) fs.WalkDirFunc {
+func process(knownMetadata metadataMap, knownReplacements replaceMap, knownDescriptions descriptionMap, inpath string, outpath string) fs.WalkDirFunc {
 	return func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return fmt.Errorf("got an error for %q: %w", path, err)
@@ -110,11 +118,6 @@ func process(knownReplacements replaceMap, knownDescriptions descriptionMap, inp
 		if filepath.Base(targetPath) == "_index.md" {
 			targetPath = filepath.Join(filepath.Dir(targetPath), "README.md")
 		}
-
-		// docsDir is "docs", "v1.0-docs", "next-docs", etc
-		docsDir := "/" + strings.TrimPrefix(targetPath, outpath)
-
-		log.Println("docsDir: " + docsDir)
 
 		// Separate the header, which is in a block starting and ending with "---"
 		parts := bytes.SplitN(contents, []byte("---"), 3)
@@ -218,15 +221,70 @@ func process(knownReplacements replaceMap, knownDescriptions descriptionMap, inp
 			return fmt.Errorf("failed to write %q: %w", targetPath, err)
 		}
 
+		knownMetadata[targetPath] = rutte.ManifestMetadata{
+			Title:  inputHeader.LinkTitle,
+			Weight: inputHeader.Weight,
+		}
+
 		filesProcessed += 1
 
 		return nil
 	}
 }
 
+func createManifests(knownMetadata metadataMap, metadataFiles map[string]*rutte.MetadataFile, inpath string) fs.WalkDirFunc {
+	return func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		splitPathParts := strings.Split(strings.TrimPrefix(path, inpath), "/")
+
+		docsDir := splitPathParts[0]
+
+		log.Println("docsDir: " + docsDir)
+
+		metadataFile, ok := metadataFiles[docsDir]
+		if !ok {
+			metadataFiles[docsDir] = rutte.NewMetadataFile()
+			metadataFile = metadataFiles[docsDir]
+		}
+
+		_, err = rutte.DeepestDir(metadataFile, splitPathParts[1:])
+		if err != nil {
+			return fmt.Errorf("couldn't find deepest dir for %q: %w", path, err)
+		}
+
+		if d.IsDir() {
+			// some directories are used locally and in paths but aren't present on the
+			// sidebar. We can identify this where a directory doesn't have a README.md
+			// e.g. https://cert-manager.io/docs/tutorials/acme/dns-validation/
+			_, exists := knownMetadata[filepath.Join(path, "README.md")]
+			if !exists {
+				// if there's no README, then markdown files under this dir will add
+				// themselves as WeightedManifestEntry under the deepest DirManifestEntry
+				// they can navigate to
+				return nil
+			}
+
+			// if there IS a README, add a DirManifestEntry and markdown files in this dir
+			// will add themselve to that DirManifestEntry
+
+			return nil
+		}
+
+		if !strings.HasSuffix(path, ".md") {
+			return nil
+		}
+
+		log.Println(metadataFile.Title)
+
+		return nil
+	}
+}
+
 func main() {
-	replacementsFile := "replacements.json"
-	descriptionsFile := "descriptions.json"
+	metadataFiles := make(map[string]*rutte.MetadataFile)
 
 	knownReplacements, err := loadReplacements(replacementsFile)
 	if err != nil {
@@ -238,16 +296,40 @@ func main() {
 		log.Printf("failed to load %q: %s", descriptionsFile, err)
 	}
 
+	knownMetadata, err := loadMetadata(metadataFile)
+	if err != nil {
+		log.Printf("failed to load %q: %s", metadataFile, err)
+	}
+
 	defer writeReplacements(replacementsFile, knownReplacements)
 	defer writeDescriptions(descriptionsFile, knownDescriptions)
+	defer writeMetadata(metadataFile, knownMetadata)
 
-	if err := filepath.WalkDir(inpath, process(knownReplacements, knownDescriptions, inpath, outpath)); err != nil {
+	if err := filepath.WalkDir(inpath, process(knownMetadata, knownReplacements, knownDescriptions, inpath, outpath)); err != nil {
 		log.Printf("failed to process: %s", err.Error())
 		os.Exit(1)
 	}
 
 	log.Printf("%d replacements total", replacementCount)
 	log.Printf("%d unique replacements", len(knownReplacements))
+
+	if err := filepath.WalkDir(outpath, createManifests(knownMetadata, metadataFiles, outpath)); err != nil {
+		log.Printf("failed to create manifests: %s", err.Error())
+		os.Exit(1)
+	}
+
+	exitCode := 0
+
+	for filename, metadataFile := range metadataFiles {
+		fullFilename := filepath.Join(outpath, filename, "manifest.json")
+		err = os.WriteFile(fullFilename, []byte(metadataFile.String()), 0o664)
+		if err != nil {
+			log.Printf("failed to write metadata file %q: %s", fullFilename, err)
+			exitCode = 1
+		}
+	}
+
+	os.Exit(exitCode)
 }
 
 // util functions
@@ -378,6 +460,36 @@ func writeDescriptions(filename string, knownDescriptions descriptionMap) error 
 	return err
 }
 
+func loadMetadata(filename string) (metadataMap, error) {
+	var out metadataMap
+
+	contents, err := os.ReadFile(filename)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return make(metadataMap), nil
+		}
+
+		return nil, err
+	}
+
+	err = json.Unmarshal(contents, &out)
+	if err != nil {
+		return nil, err
+	}
+
+	return out, nil
+}
+
+func writeMetadata(filename string, knownMetadata metadataMap) error {
+	out, err := json.MarshalIndent(knownMetadata, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(filename, out, 0o664)
+	return err
+}
+
 func hashOf(block []byte) string {
 	hash := sha256.Sum256(block)
 	return hex.EncodeToString(hash[:])
@@ -411,50 +523,6 @@ func ParseInputHeader(header []byte) (InputHeader, error) {
 	}
 
 	return out, nil
-}
-
-func deriveTitleAndWeight(header []byte) (string, int64, error) {
-	scanner := bufio.NewScanner(bytes.NewReader(header))
-
-	var title string
-
-	// some docs don't have weights, so we weight them really high as a default
-	var weight int64 = 9999
-
-	for scanner.Scan() {
-		line := scanner.Text()
-
-		parts := strings.SplitN(line, ":", 2)
-		if len(parts) != 2 {
-			continue
-		}
-
-		prefix := strings.ToLower(parts[0])
-
-		if prefix != "title" && prefix != "weight" {
-			continue
-		}
-
-		suffix := strings.TrimSpace(parts[1])
-		suffix = strings.Trim(suffix, `"'`)
-
-		if prefix == "title" {
-			title = suffix
-		} else if prefix == "weight" {
-			var err error
-
-			weight, err = strconv.ParseInt(suffix, 10, 0)
-			if err != nil {
-				return "", 0, fmt.Errorf("failed to parse weight %q: %w", parts[1], err)
-			}
-		}
-	}
-
-	if title != "" {
-		return title, weight, nil
-	}
-
-	return "", 0, fmt.Errorf("couldn't find a 'title:' in header")
 }
 
 type PageHeader struct {
