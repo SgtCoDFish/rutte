@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/SgtCoDFish/rutte"
@@ -232,60 +233,115 @@ func process(knownMetadata metadataMap, knownReplacements replaceMap, knownDescr
 	}
 }
 
-func createManifests(knownMetadata metadataMap, metadataFiles map[string]*rutte.MetadataFile, inpath string) fs.WalkDirFunc {
-	return func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
+func dirManifest(knownMetadata metadataMap, dirPath string) (rutte.ManifestEntry, error) {
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return rutte.ManifestEntry{}, err
+	}
 
-		splitPathParts := strings.Split(strings.TrimPrefix(path, inpath), "/")
+	readmeMetadata, ok := knownMetadata[filepath.Join(dirPath, "README.md")]
+	if !ok {
+		return rutte.ManifestEntry{}, fmt.Errorf("no metadata found for %q", dirPath)
+	}
 
-		docsDir := splitPathParts[0]
+	manifestOut := rutte.ManifestEntry{
+		Title:  readmeMetadata.Title,
+		Weight: readmeMetadata.Weight,
+	}
 
-		log.Println("docsDir: " + docsDir)
+	for _, entry := range entries {
+		fullPath := filepath.Join(dirPath, entry.Name())
 
-		metadataFile, ok := metadataFiles[docsDir]
-		if !ok {
-			metadataFiles[docsDir] = rutte.NewMetadataFile()
-			metadataFile = metadataFiles[docsDir]
-		}
+		log.Printf("processing %q", fullPath)
 
-		_, err = rutte.DeepestDir(metadataFile, splitPathParts[1:])
-		if err != nil {
-			return fmt.Errorf("couldn't find deepest dir for %q: %w", path, err)
-		}
+		if entry.IsDir() {
+			readmePath := filepath.Join(fullPath, "README.md")
+			_, readmeErr := os.Stat(readmePath)
+			if readmeErr == nil {
+				// if there's a readme in the subdir, recurse into it
+				manifest, err := dirManifest(knownMetadata, fullPath)
+				if err != nil {
+					return rutte.ManifestEntry{}, err
+				}
 
-		if d.IsDir() {
-			// some directories are used locally and in paths but aren't present on the
-			// sidebar. We can identify this where a directory doesn't have a README.md
-			// e.g. https://cert-manager.io/docs/tutorials/acme/dns-validation/
-			_, exists := knownMetadata[filepath.Join(path, "README.md")]
-			if !exists {
-				// if there's no README, then markdown files under this dir will add
-				// themselves as WeightedManifestEntry under the deepest DirManifestEntry
-				// they can navigate to
-				return nil
+				manifestOut.Routes = append(manifestOut.Routes, manifest)
+			} else if os.IsNotExist(readmeErr) {
+				// the dir has no README, so add it to the entries for this directory rather
+				// than making a new entry
+				subdirEntries, err := os.ReadDir(fullPath)
+				if err != nil {
+					return rutte.ManifestEntry{}, fmt.Errorf("failed to list files in %q: %w", fullPath, err)
+				}
+
+				for _, subdirEntry := range subdirEntries {
+					fullSubDirPath := filepath.Join(fullPath, subdirEntry.Name())
+					newManifest, err := fileManifest(knownMetadata, fullSubDirPath)
+					if err != nil {
+						return rutte.ManifestEntry{}, err
+					}
+
+					if newManifest == nil {
+						continue
+					}
+
+					manifestOut.Routes = append(manifestOut.Routes, *newManifest)
+				}
+			} else {
+				return rutte.ManifestEntry{}, fmt.Errorf("failed to check for %q: %w", readmePath, readmeErr)
 			}
 
-			// if there IS a README, add a DirManifestEntry and markdown files in this dir
-			// will add themselve to that DirManifestEntry
-
-			return nil
+			continue
 		}
 
-		if !strings.HasSuffix(path, ".md") {
-			return nil
+		newManifest, err := fileManifest(knownMetadata, fullPath)
+		if err != nil {
+			return rutte.ManifestEntry{}, err
 		}
 
-		log.Println(metadataFile.Title)
+		if newManifest == nil {
+			continue
+		}
 
-		return nil
+		manifestOut.Routes = append(manifestOut.Routes, *newManifest)
 	}
+
+	sort.Slice(manifestOut.Routes, func(i, j int) bool {
+		return manifestOut.Routes[i].Weight < manifestOut.Routes[j].Weight
+	})
+
+	return manifestOut, nil
+}
+
+func fileManifest(knownMetadata metadataMap, fullPath string) (*rutte.ManifestEntry, error) {
+	filename := filepath.Base(fullPath)
+
+	if filepath.Ext(filename) != ".md" {
+		return nil, nil
+	}
+
+	fileMetadata, ok := knownMetadata[fullPath]
+	if !ok {
+		return nil, fmt.Errorf("missing metadata for %s", fullPath)
+	}
+
+	actualTitle := fileMetadata.Title
+	actualWeight := fileMetadata.Weight
+
+	if filename == "README.md" {
+		actualTitle = "Introduction"
+		actualWeight = -9999
+	}
+
+	actualPath := "/" + strings.TrimPrefix(fullPath, outpath)
+
+	return &rutte.ManifestEntry{
+		Title:  actualTitle,
+		Weight: actualWeight,
+		Path:   actualPath,
+	}, nil
 }
 
 func main() {
-	metadataFiles := make(map[string]*rutte.MetadataFile)
-
 	knownReplacements, err := loadReplacements(replacementsFile)
 	if err != nil {
 		log.Printf("failed to load %q: %s", replacementsFile, err)
@@ -313,23 +369,45 @@ func main() {
 	log.Printf("%d replacements total", replacementCount)
 	log.Printf("%d unique replacements", len(knownReplacements))
 
-	if err := filepath.WalkDir(outpath, createManifests(knownMetadata, metadataFiles, outpath)); err != nil {
-		log.Printf("failed to create manifests: %s", err.Error())
+	outEntries, err := os.ReadDir(outpath)
+	if err != nil {
+		log.Printf("failed to list %q: %s", outpath, err)
 		os.Exit(1)
 	}
 
-	exitCode := 0
+	for _, outEntry := range outEntries {
+		if !outEntry.IsDir() {
+			continue
+		}
 
-	for filename, metadataFile := range metadataFiles {
-		fullFilename := filepath.Join(outpath, filename, "manifest.json")
-		err = os.WriteFile(fullFilename, []byte(metadataFile.String()), 0o664)
+		fullDirName := filepath.Join(outpath, outEntry.Name())
+
+		manifestFilename := filepath.Join(fullDirName, "manifest.json")
+
+		manifest, err := dirManifest(knownMetadata, fullDirName)
 		if err != nil {
-			log.Printf("failed to write metadata file %q: %s", fullFilename, err)
-			exitCode = 1
+			log.Printf("failed to create manifest for %q: %s", manifestFilename, err)
+			continue
+		}
+
+		manifestFile := struct {
+			Routes []rutte.ManifestEntry `json:"routes"`
+		}{
+			Routes: []rutte.ManifestEntry{manifest},
+		}
+
+		marshalledManifest, err := json.MarshalIndent(manifestFile, "", "  ")
+		if err != nil {
+			log.Printf("failed to marshal %q: %s", manifestFilename, err)
+			continue
+		}
+
+		err = os.WriteFile(manifestFilename, marshalledManifest, 0o664)
+		if err != nil {
+			log.Printf("failed to write metadata file %q: %s", manifestFilename, err)
+			continue
 		}
 	}
-
-	os.Exit(exitCode)
 }
 
 // util functions
