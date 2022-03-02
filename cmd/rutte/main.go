@@ -60,6 +60,14 @@ func blockNeedsReplacement(block []byte) bool {
 		return true
 	}
 
+	if bytes.Index(block, []byte("class=\"")) != -1 {
+		return true
+	}
+
+	if bytes.Index(block, []byte("(/docs/")) != -1 {
+		return true
+	}
+
 	return false
 }
 
@@ -103,6 +111,10 @@ func process(knownMetadata metadataMap, knownReplacements replaceMap, knownDescr
 		}
 
 		if !strings.HasSuffix(path, ".md") {
+			if filepath.Base(path) == "_index.html" {
+				return nil
+			}
+
 			// Not markdown: simply copy to target path, unchanged
 			if verbose {
 				log.Printf("copying non-markdown file %q verbatim", path)
