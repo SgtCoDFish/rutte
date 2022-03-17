@@ -48,24 +48,21 @@ var (
 )
 
 func blockNeedsReplacement(block []byte) bool {
-	if bytes.Index(block, []byte("{{%")) != -1 {
-		return true
+	checks := [][]byte{
+		[]byte("{{%"),
+		[]byte("../"),
+		[]byte("./"),
+		[]byte(`class="`),
+		[]byte("(/docs/"),
+		[]byte("{#"),
+		[]byte("<!--"),
+		[]byte("-->"),
 	}
 
-	if bytes.Index(block, []byte("../")) != -1 {
-		return true
-	}
-
-	if bytes.Index(block, []byte("./")) != -1 {
-		return true
-	}
-
-	if bytes.Index(block, []byte("class=\"")) != -1 {
-		return true
-	}
-
-	if bytes.Index(block, []byte("(/docs/")) != -1 {
-		return true
+	for _, check := range checks {
+		if bytes.Index(block, check) != -1 {
+			return true
+		}
 	}
 
 	return false
