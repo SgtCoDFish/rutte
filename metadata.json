@@ -12,24 +12,24 @@
     "weight": 500
   },
   "content-out/docs/cli/acmesolver.md": {
-    "title": "acmesolver CLI reference",
-    "weight": 9999
+    "title": "acmesolver",
+    "weight": 960
   },
   "content-out/docs/cli/cainjector.md": {
-    "title": "cainjector CLI reference",
-    "weight": 9999
+    "title": "cainjector",
+    "weight": 960
   },
   "content-out/docs/cli/cmctl.md": {
-    "title": "cmctl CLI reference",
-    "weight": 9999
+    "title": "cmctl",
+    "weight": 960
   },
   "content-out/docs/cli/controller.md": {
-    "title": "controller CLI reference",
-    "weight": 9999
+    "title": "controller",
+    "weight": 960
   },
   "content-out/docs/cli/webhook.md": {
-    "title": "webhook CLI reference",
-    "weight": 9999
+    "title": "webhook",
+    "weight": 960
   },
   "content-out/docs/concepts/README.md": {
     "title": "Concepts",
@@ -234,6 +234,10 @@
   "content-out/docs/installation/README.md": {
     "title": "Installation",
     "weight": 10
+  },
+  "content-out/docs/installation/api-compatibility.md": {
+    "title": "API compatibility",
+    "weight": 70
   },
   "content-out/docs/installation/cmctl.md": {
     "title": "cmctl",
@@ -572,24 +576,24 @@
     "weight": 500
   },
   "content-out/next-docs/cli/acmesolver.md": {
-    "title": "acmesolver CLI reference",
-    "weight": 9999
+    "title": "acmesolver",
+    "weight": 960
   },
   "content-out/next-docs/cli/cainjector.md": {
-    "title": "cainjector CLI reference",
-    "weight": 9999
+    "title": "cainjector",
+    "weight": 960
   },
   "content-out/next-docs/cli/cmctl.md": {
-    "title": "cmctl CLI reference",
-    "weight": 9999
+    "title": "cmctl",
+    "weight": 960
   },
   "content-out/next-docs/cli/controller.md": {
-    "title": "controller CLI reference",
-    "weight": 9999
+    "title": "controller",
+    "weight": 960
   },
   "content-out/next-docs/cli/webhook.md": {
-    "title": "webhook CLI reference",
-    "weight": 9999
+    "title": "webhook",
+    "weight": 960
   },
   "content-out/next-docs/concepts/README.md": {
     "title": "Concepts",
@@ -1752,16 +1756,16 @@
     "weight": 500
   },
   "content-out/v0.15-docs/cli/cainjector.md": {
-    "title": "cainjector CLI reference",
-    "weight": 9999
+    "title": "cainjector",
+    "weight": 960
   },
   "content-out/v0.15-docs/cli/cmctl.md": {
-    "title": "cmctl CLI reference",
-    "weight": 9999
+    "title": "cmctl",
+    "weight": 960
   },
   "content-out/v0.15-docs/cli/controller.md": {
-    "title": "controller CLI reference",
-    "weight": 9999
+    "title": "controller",
+    "weight": 960
   },
   "content-out/v0.15-docs/concepts/README.md": {
     "title": "Concepts",
@@ -1984,24 +1988,24 @@
     "weight": 500
   },
   "content-out/v0.16-docs/cli/acmesolver.md": {
-    "title": "acmesolver CLI reference",
-    "weight": 9999
+    "title": "acmesolver",
+    "weight": 960
   },
   "content-out/v0.16-docs/cli/cainjector.md": {
-    "title": "cainjector CLI reference",
-    "weight": 9999
+    "title": "cainjector",
+    "weight": 960
   },
   "content-out/v0.16-docs/cli/cmctl.md": {
-    "title": "cmctl CLI reference",
-    "weight": 9999
+    "title": "cmctl",
+    "weight": 960
   },
   "content-out/v0.16-docs/cli/controller.md": {
-    "title": "controller CLI reference",
-    "weight": 9999
+    "title": "controller",
+    "weight": 960
   },
   "content-out/v0.16-docs/cli/webhook.md": {
-    "title": "webhook CLI reference",
-    "weight": 9999
+    "title": "webhook",
+    "weight": 960
   },
   "content-out/v0.16-docs/concepts/README.md": {
     "title": "Concepts",
@@ -2232,24 +2236,24 @@
     "weight": 500
   },
   "content-out/v1.0-docs/cli/acmesolver.md": {
-    "title": "acmesolver CLI reference",
-    "weight": 9999
+    "title": "acmesolver",
+    "weight": 960
   },
   "content-out/v1.0-docs/cli/cainjector.md": {
-    "title": "cainjector CLI reference",
-    "weight": 9999
+    "title": "cainjector",
+    "weight": 960
   },
   "content-out/v1.0-docs/cli/cmctl.md": {
-    "title": "cmctl CLI reference",
-    "weight": 9999
+    "title": "cmctl",
+    "weight": 960
   },
   "content-out/v1.0-docs/cli/controller.md": {
-    "title": "controller CLI reference",
-    "weight": 9999
+    "title": "controller",
+    "weight": 960
   },
   "content-out/v1.0-docs/cli/webhook.md": {
-    "title": "webhook CLI reference",
-    "weight": 9999
+    "title": "webhook",
+    "weight": 960
   },
   "content-out/v1.0-docs/concepts/README.md": {
     "title": "Concepts",
@@ -2484,24 +2488,24 @@
     "weight": 500
   },
   "content-out/v1.1-docs/cli/acmesolver.md": {
-    "title": "acmesolver CLI reference",
-    "weight": 9999
+    "title": "acmesolver",
+    "weight": 960
   },
   "content-out/v1.1-docs/cli/cainjector.md": {
-    "title": "cainjector CLI reference",
-    "weight": 9999
+    "title": "cainjector",
+    "weight": 960
   },
   "content-out/v1.1-docs/cli/cmctl.md": {
-    "title": "cmctl CLI reference",
-    "weight": 9999
+    "title": "cmctl",
+    "weight": 960
   },
   "content-out/v1.1-docs/cli/controller.md": {
-    "title": "controller CLI reference",
-    "weight": 9999
+    "title": "controller",
+    "weight": 960
   },
   "content-out/v1.1-docs/cli/webhook.md": {
-    "title": "webhook CLI reference",
-    "weight": 9999
+    "title": "webhook",
+    "weight": 960
   },
   "content-out/v1.1-docs/concepts/README.md": {
     "title": "Concepts",
@@ -2736,24 +2740,24 @@
     "weight": 500
   },
   "content-out/v1.2-docs/cli/acmesolver.md": {
-    "title": "acmesolver CLI reference",
-    "weight": 9999
+    "title": "acmesolver",
+    "weight": 960
   },
   "content-out/v1.2-docs/cli/cainjector.md": {
-    "title": "cainjector CLI reference",
-    "weight": 9999
+    "title": "cainjector",
+    "weight": 960
   },
   "content-out/v1.2-docs/cli/cmctl.md": {
-    "title": "cmctl CLI reference",
-    "weight": 9999
+    "title": "cmctl",
+    "weight": 960
   },
   "content-out/v1.2-docs/cli/controller.md": {
-    "title": "controller CLI reference",
-    "weight": 9999
+    "title": "controller",
+    "weight": 960
   },
   "content-out/v1.2-docs/cli/webhook.md": {
-    "title": "webhook CLI reference",
-    "weight": 9999
+    "title": "webhook",
+    "weight": 960
   },
   "content-out/v1.2-docs/concepts/README.md": {
     "title": "Concepts",
@@ -2988,24 +2992,24 @@
     "weight": 500
   },
   "content-out/v1.3-docs/cli/acmesolver.md": {
-    "title": "acmesolver CLI reference",
-    "weight": 9999
+    "title": "acmesolver",
+    "weight": 960
   },
   "content-out/v1.3-docs/cli/cainjector.md": {
-    "title": "cainjector CLI reference",
-    "weight": 9999
+    "title": "cainjector",
+    "weight": 960
   },
   "content-out/v1.3-docs/cli/cmctl.md": {
-    "title": "cmctl CLI reference",
-    "weight": 9999
+    "title": "cmctl",
+    "weight": 960
   },
   "content-out/v1.3-docs/cli/controller.md": {
-    "title": "controller CLI reference",
-    "weight": 9999
+    "title": "controller",
+    "weight": 960
   },
   "content-out/v1.3-docs/cli/webhook.md": {
-    "title": "webhook CLI reference",
-    "weight": 9999
+    "title": "webhook",
+    "weight": 960
   },
   "content-out/v1.3-docs/concepts/README.md": {
     "title": "Concepts",
@@ -3240,24 +3244,24 @@
     "weight": 500
   },
   "content-out/v1.4-docs/cli/acmesolver.md": {
-    "title": "acmesolver CLI reference",
-    "weight": 9999
+    "title": "acmesolver",
+    "weight": 960
   },
   "content-out/v1.4-docs/cli/cainjector.md": {
-    "title": "cainjector CLI reference",
-    "weight": 9999
+    "title": "cainjector",
+    "weight": 960
   },
   "content-out/v1.4-docs/cli/cmctl.md": {
-    "title": "cmctl CLI reference",
-    "weight": 9999
+    "title": "cmctl",
+    "weight": 960
   },
   "content-out/v1.4-docs/cli/controller.md": {
-    "title": "controller CLI reference",
-    "weight": 9999
+    "title": "controller",
+    "weight": 960
   },
   "content-out/v1.4-docs/cli/webhook.md": {
-    "title": "webhook CLI reference",
-    "weight": 9999
+    "title": "webhook",
+    "weight": 960
   },
   "content-out/v1.4-docs/concepts/README.md": {
     "title": "Concepts",
@@ -3500,24 +3504,24 @@
     "weight": 500
   },
   "content-out/v1.5-docs/cli/acmesolver.md": {
-    "title": "acmesolver CLI reference",
-    "weight": 9999
+    "title": "acmesolver",
+    "weight": 960
   },
   "content-out/v1.5-docs/cli/cainjector.md": {
-    "title": "cainjector CLI reference",
-    "weight": 9999
+    "title": "cainjector",
+    "weight": 960
   },
   "content-out/v1.5-docs/cli/cmctl.md": {
-    "title": "cmctl CLI reference",
-    "weight": 9999
+    "title": "cmctl",
+    "weight": 960
   },
   "content-out/v1.5-docs/cli/controller.md": {
-    "title": "controller CLI reference",
-    "weight": 9999
+    "title": "controller",
+    "weight": 960
   },
   "content-out/v1.5-docs/cli/webhook.md": {
-    "title": "webhook CLI reference",
-    "weight": 9999
+    "title": "webhook",
+    "weight": 960
   },
   "content-out/v1.5-docs/concepts/README.md": {
     "title": "Concepts",
@@ -3776,24 +3780,24 @@
     "weight": 500
   },
   "content-out/v1.6-docs/cli/acmesolver.md": {
-    "title": "acmesolver CLI reference",
-    "weight": 9999
+    "title": "acmesolver",
+    "weight": 960
   },
   "content-out/v1.6-docs/cli/cainjector.md": {
-    "title": "cainjector CLI reference",
-    "weight": 9999
+    "title": "cainjector",
+    "weight": 960
   },
   "content-out/v1.6-docs/cli/cmctl.md": {
-    "title": "cmctl CLI reference",
-    "weight": 9999
+    "title": "cmctl",
+    "weight": 960
   },
   "content-out/v1.6-docs/cli/controller.md": {
-    "title": "controller CLI reference",
-    "weight": 9999
+    "title": "controller",
+    "weight": 960
   },
   "content-out/v1.6-docs/cli/webhook.md": {
-    "title": "webhook CLI reference",
-    "weight": 9999
+    "title": "webhook",
+    "weight": 960
   },
   "content-out/v1.6-docs/concepts/README.md": {
     "title": "Concepts",
@@ -4064,24 +4068,24 @@
     "weight": 500
   },
   "content-out/v1.7-docs/cli/acmesolver.md": {
-    "title": "acmesolver CLI reference",
-    "weight": 9999
+    "title": "acmesolver",
+    "weight": 960
   },
   "content-out/v1.7-docs/cli/cainjector.md": {
-    "title": "cainjector CLI reference",
-    "weight": 9999
+    "title": "cainjector",
+    "weight": 960
   },
   "content-out/v1.7-docs/cli/cmctl.md": {
-    "title": "cmctl CLI reference",
-    "weight": 9999
+    "title": "cmctl",
+    "weight": 960
   },
   "content-out/v1.7-docs/cli/controller.md": {
-    "title": "controller CLI reference",
-    "weight": 9999
+    "title": "controller",
+    "weight": 960
   },
   "content-out/v1.7-docs/cli/webhook.md": {
-    "title": "webhook CLI reference",
-    "weight": 9999
+    "title": "webhook",
+    "weight": 960
   },
   "content-out/v1.7-docs/concepts/README.md": {
     "title": "Concepts",

@@ -67,6 +67,7 @@
   "http01/_index.md": "cert-manager configuration: ACME HTTP-01 challenges",
   "http01/externalloadbalancer.md": "cert-manager configuration: ACME HTTP-01 challenges using External Load Balancers",
   "installation/_index.md": "cert-manager installation: Overview",
+  "installation/api-compatibility.md": "cert-manager API compatibility guarantees",
   "installation/cmctl.md": "cert-manager installation: cmctl",
   "installation/code-signing.md": "cert-manager installation: Code signing",
   "installation/compatibility.md": "cert-manager installation: Cloud provider compatibility",
