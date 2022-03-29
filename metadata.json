@@ -167,6 +167,18 @@
     "title": "Implementing External Issuers",
     "weight": 70
   },
+  "content-out/docs/contributing/google-season-of-docs/2022/README.md": {
+    "title": "2022",
+    "weight": 70
+  },
+  "content-out/docs/contributing/google-season-of-docs/2022/improve-navigation-and-structure/index.md": {
+    "title": "Improve the Navigation and Structure of the cert-manager Website",
+    "weight": 70
+  },
+  "content-out/docs/contributing/google-season-of-docs/README.md": {
+    "title": "Google Season of Docs",
+    "weight": 70
+  },
   "content-out/docs/contributing/importing.md": {
     "title": "Importing cert-manager in Go",
     "weight": 500
@@ -798,6 +810,10 @@
   "content-out/next-docs/installation/README.md": {
     "title": "Installation",
     "weight": 10
+  },
+  "content-out/next-docs/installation/api-compatibility.md": {
+    "title": "API compatibility",
+    "weight": 70
   },
   "content-out/next-docs/installation/cmctl.md": {
     "title": "cmctl",
@@ -4211,6 +4227,10 @@
     "title": "Writing “cert-manager”",
     "weight": 60
   },
+  "content-out/v1.7-docs/faq/sync-secrets.md": {
+    "title": "Syncing Secrets Across Namespaces",
+    "weight": 60
+  },
   "content-out/v1.7-docs/faq/terminology.md": {
     "title": "TLS Terminology",
     "weight": 50
@@ -4220,12 +4240,16 @@
     "weight": 60
   },
   "content-out/v1.7-docs/faq/webhook.md": {
-    "title": "Webhook",
+    "title": "Troubleshooting webhook",
     "weight": 60
   },
   "content-out/v1.7-docs/installation/README.md": {
     "title": "Installation",
     "weight": 10
+  },
+  "content-out/v1.7-docs/installation/api-compatibility.md": {
+    "title": "API compatibility",
+    "weight": 70
   },
   "content-out/v1.7-docs/installation/cmctl.md": {
     "title": "cmctl",
@@ -4290,6 +4314,14 @@
   "content-out/v1.7-docs/tutorials/acme/migrating-from-kube-lego.md": {
     "title": "Migrating from Kube-LEGO",
     "weight": 10
+  },
+  "content-out/v1.7-docs/tutorials/acme/nginx-ingress.md": {
+    "title": "Securing NGINX-ingress",
+    "weight": 50
+  },
+  "content-out/v1.7-docs/tutorials/acme/pomerium-ingress.md": {
+    "title": "Pomerium Ingress",
+    "weight": 50
   },
   "content-out/v1.7-docs/tutorials/backup.md": {
     "title": "Backup and Restore Resources",

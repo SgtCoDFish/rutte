@@ -1,4 +1,5 @@
 {
+  "2022/_index.md": "Google season of docs 2022 proposal",
   "aboutjetstack/_index.md": "About Jetstack, the originating company for cert-manager",
   "acme/_index.md": "cert-manager configuration: ACME Issuers",
   "acme/dns-validation.md": "cert-manager turorials: Issuing an ACME certificate using DNS validation",
@@ -64,8 +65,10 @@
   "faq/terminology.md": "cert-manager FAQ: TLS terminology",
   "faq/troubleshooting.md": "cert-manager FAQ: Troubleshooting",
   "faq/webhook.md": "cert-manager FAQ: Webhook",
+  "google-season-of-docs/_index.md": "Google season of docs 2022 proposal",
   "http01/_index.md": "cert-manager configuration: ACME HTTP-01 challenges",
   "http01/externalloadbalancer.md": "cert-manager configuration: ACME HTTP-01 challenges using External Load Balancers",
+  "improve-navigation-and-structure/index.md": "Google season of docs 2022 proposal",
   "installation/_index.md": "cert-manager installation: Overview",
   "installation/api-compatibility.md": "cert-manager API compatibility guarantees",
   "installation/cmctl.md": "cert-manager installation: cmctl",
