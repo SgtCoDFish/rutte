@@ -1,5 +1,8 @@
 # rutte
 
+ARCHIVED: now that the cert-manager website has been migrated, this script has
+no purpose. I'm leaving it for future reference, just-in-case!
+
 This is a one-off script for migrating the cert-manager website. It takes
 old docs which might need some sections replacing, and iteratively prompts
 the user for replacements for each section.
@@ -17,7 +20,6 @@ The repo includes checked-in versions of the following files:
 - `replacements.json` - cached replacements for links and hugo-style tags
 - `descriptions.json` - descriptions, cached for different docs versions where filenames are unchanged
 - `metadata.json` - sidebar ordering weights and sidebar titles for generating manifests
-
 
 ## Usage
 
