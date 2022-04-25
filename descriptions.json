@@ -111,6 +111,7 @@
   "release-notes/release-notes-1.5.md": "cert-manager release notes: cert-manager v1.5",
   "release-notes/release-notes-1.6.md": "cert-manager release notes: cert-manager v1.6",
   "release-notes/release-notes-1.7.md": "cert-manager release notes: cert-manager v1.7",
+  "release-notes/release-notes-1.8.md": "cert-manager release notes: cert-manager v1.8",
   "tutorials/_index.md": "cert-manager tutorials: Overview",
   "tutorials/backup.md": "cert-manager tutorials: Backing up your cert-manager installation",
   "uninstall/_index.md": "cert-manager installation: Uninstalling cert-manager",
@@ -141,6 +142,7 @@
   "upgrading/upgrading-1.4-1.5.md": "cert-manager installation: Upgrading v1.4 to v1.5",
   "upgrading/upgrading-1.5-1.6.md": "cert-manager installation: Upgrading v1.5 to v1.6",
   "upgrading/upgrading-1.6-1.7.md": "cert-manager installation: Upgrading v1.6 to v1.7",
+  "upgrading/upgrading-1.7-1.8.md": "cert-manager installation: Upgrading v1.6 to v1.7",
   "usage/_index.md": "cert-manager usage: Overview",
   "usage/approver-policy.md": "cert-manager usage: approver-policy",
   "usage/certificate.md": "cert-manager usage: Certificates",
@@ -165,5 +167,6 @@
   "v1.5-docs/_index.md": "cert-manager documentation",
   "v1.6-docs/_index.md": "cert-manager documentation",
   "v1.7-docs/_index.md": "cert-manager documentation",
+  "v1.8-docs/_index.md": "cert-manager documentation",
   "venafi/venafi.md": "cert-manager tutorials: Securing Ingress using Venafi Issuers"
 }

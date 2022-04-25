@@ -57,6 +57,9 @@ func blockNeedsReplacement(block []byte) bool {
 		[]byte("{#"),
 		[]byte("<!--"),
 		[]byte("-->"),
+		[]byte("cert-manager-pubkey-2021-09-20.pem"),
+		[]byte("cert-manager-keyring-2021-09-20-1020CF3C033D4F35BAE1C19E1226061C665DF13E.gpg"),
+		[]byte("cert-manager-pgp-2021-09-20-1020CF3C033D4F35BAE1C19E1226061C665DF13E.asc"),
 	}
 
 	for _, check := range checks {

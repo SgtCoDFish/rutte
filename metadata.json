@@ -391,6 +391,10 @@
     "title": "v1.6 to v1.7",
     "weight": 750
   },
+  "content-out/docs/installation/upgrading/upgrading-1.7-1.8.md": {
+    "title": "v1.7 to v1.8",
+    "weight": 740
+  },
   "content-out/docs/installation/verify.md": {
     "title": "Verifying",
     "weight": 30
@@ -498,6 +502,10 @@
   "content-out/docs/release-notes/release-notes-1.7.md": {
     "title": "v1.7",
     "weight": 760
+  },
+  "content-out/docs/release-notes/release-notes-1.8.md": {
+    "title": "v1.8",
+    "weight": 750
   },
   "content-out/docs/tutorials/README.md": {
     "title": "Tutorials",
@@ -4372,6 +4380,298 @@
     "weight": 100
   },
   "content-out/v1.7-docs/usage/prometheus-metrics.md": {
+    "title": "Prometheus Metrics",
+    "weight": 100
+  },
+  "content-out/v1.8-docs/README.md": {
+    "title": "cert-manager",
+    "weight": 10
+  },
+  "content-out/v1.8-docs/cli/README.md": {
+    "title": "CLI reference",
+    "weight": 500
+  },
+  "content-out/v1.8-docs/cli/acmesolver.md": {
+    "title": "acmesolver",
+    "weight": 960
+  },
+  "content-out/v1.8-docs/cli/cainjector.md": {
+    "title": "cainjector",
+    "weight": 960
+  },
+  "content-out/v1.8-docs/cli/cmctl.md": {
+    "title": "cmctl",
+    "weight": 960
+  },
+  "content-out/v1.8-docs/cli/controller.md": {
+    "title": "controller",
+    "weight": 960
+  },
+  "content-out/v1.8-docs/cli/webhook.md": {
+    "title": "webhook",
+    "weight": 960
+  },
+  "content-out/v1.8-docs/concepts/README.md": {
+    "title": "Concepts",
+    "weight": 90
+  },
+  "content-out/v1.8-docs/concepts/acme-orders-challenges.md": {
+    "title": "ACME Orders and Challenges",
+    "weight": 350
+  },
+  "content-out/v1.8-docs/concepts/ca-injector.md": {
+    "title": "CA Injector",
+    "weight": 600
+  },
+  "content-out/v1.8-docs/concepts/certificate.md": {
+    "title": "Certificate",
+    "weight": 200
+  },
+  "content-out/v1.8-docs/concepts/certificaterequest.md": {
+    "title": "CertificateRequest",
+    "weight": 300
+  },
+  "content-out/v1.8-docs/concepts/issuer.md": {
+    "title": "Issuer",
+    "weight": 100
+  },
+  "content-out/v1.8-docs/concepts/webhook.md": {
+    "title": "Webhook",
+    "weight": 400
+  },
+  "content-out/v1.8-docs/configuration/README.md": {
+    "title": "Configuration",
+    "weight": 30
+  },
+  "content-out/v1.8-docs/configuration/acme/README.md": {
+    "title": "ACME",
+    "weight": 60
+  },
+  "content-out/v1.8-docs/configuration/acme/dns01/README.md": {
+    "title": "DNS01",
+    "weight": 30
+  },
+  "content-out/v1.8-docs/configuration/acme/dns01/acme-dns.md": {
+    "title": "ACMEDNS",
+    "weight": 30
+  },
+  "content-out/v1.8-docs/configuration/acme/dns01/akamai.md": {
+    "title": "Akamai",
+    "weight": 30
+  },
+  "content-out/v1.8-docs/configuration/acme/dns01/azuredns.md": {
+    "title": "AzureDNS",
+    "weight": 30
+  },
+  "content-out/v1.8-docs/configuration/acme/dns01/cloudflare.md": {
+    "title": "Cloudflare",
+    "weight": 30
+  },
+  "content-out/v1.8-docs/configuration/acme/dns01/digitalocean.md": {
+    "title": "DigitalOcean",
+    "weight": 30
+  },
+  "content-out/v1.8-docs/configuration/acme/dns01/google.md": {
+    "title": "Google CloudDNS",
+    "weight": 30
+  },
+  "content-out/v1.8-docs/configuration/acme/dns01/rfc2136.md": {
+    "title": "RFC-2136",
+    "weight": 30
+  },
+  "content-out/v1.8-docs/configuration/acme/dns01/route53.md": {
+    "title": "Route53",
+    "weight": 30
+  },
+  "content-out/v1.8-docs/configuration/acme/dns01/webhook.md": {
+    "title": "Webhook",
+    "weight": 30
+  },
+  "content-out/v1.8-docs/configuration/acme/http01/README.md": {
+    "title": "HTTP01",
+    "weight": 10
+  },
+  "content-out/v1.8-docs/configuration/acme/http01/externalloadbalancer.md": {
+    "title": "External Load Balancer",
+    "weight": 40
+  },
+  "content-out/v1.8-docs/configuration/ca.md": {
+    "title": "CA",
+    "weight": 20
+  },
+  "content-out/v1.8-docs/configuration/external.md": {
+    "title": "External",
+    "weight": 50
+  },
+  "content-out/v1.8-docs/configuration/selfsigned.md": {
+    "title": "SelfSigned",
+    "weight": 10
+  },
+  "content-out/v1.8-docs/configuration/vault.md": {
+    "title": "Vault",
+    "weight": 30
+  },
+  "content-out/v1.8-docs/configuration/venafi.md": {
+    "title": "Venafi",
+    "weight": 40
+  },
+  "content-out/v1.8-docs/faq/README.md": {
+    "title": "FAQ",
+    "weight": 60
+  },
+  "content-out/v1.8-docs/faq/acme.md": {
+    "title": "Troubleshooting Issuing ACME Certificates",
+    "weight": 60
+  },
+  "content-out/v1.8-docs/faq/cluster-resource.md": {
+    "title": "Cluster Resource Namespace",
+    "weight": 60
+  },
+  "content-out/v1.8-docs/faq/style.md": {
+    "title": "Writing “cert-manager”",
+    "weight": 60
+  },
+  "content-out/v1.8-docs/faq/sync-secrets.md": {
+    "title": "Syncing Secrets Across Namespaces",
+    "weight": 60
+  },
+  "content-out/v1.8-docs/faq/terminology.md": {
+    "title": "TLS Terminology",
+    "weight": 50
+  },
+  "content-out/v1.8-docs/faq/troubleshooting.md": {
+    "title": "Troubleshooting",
+    "weight": 60
+  },
+  "content-out/v1.8-docs/faq/webhook.md": {
+    "title": "Troubleshooting webhook",
+    "weight": 60
+  },
+  "content-out/v1.8-docs/installation/README.md": {
+    "title": "Installation",
+    "weight": 10
+  },
+  "content-out/v1.8-docs/installation/api-compatibility.md": {
+    "title": "API compatibility",
+    "weight": 70
+  },
+  "content-out/v1.8-docs/installation/cmctl.md": {
+    "title": "cmctl",
+    "weight": 21
+  },
+  "content-out/v1.8-docs/installation/code-signing.md": {
+    "title": "Signature Verification",
+    "weight": 5000
+  },
+  "content-out/v1.8-docs/installation/compatibility.md": {
+    "title": "Cloud Compatibility",
+    "weight": 6
+  },
+  "content-out/v1.8-docs/installation/helm.md": {
+    "title": "Helm",
+    "weight": 22
+  },
+  "content-out/v1.8-docs/installation/kubectl-plugin.md": {
+    "title": "Kubectl plugin",
+    "weight": 21
+  },
+  "content-out/v1.8-docs/installation/kubectl.md": {
+    "title": "Kubectl apply",
+    "weight": 20
+  },
+  "content-out/v1.8-docs/installation/operator-lifecycle-manager.md": {
+    "title": "OLM",
+    "weight": 23
+  },
+  "content-out/v1.8-docs/installation/other-tools.md": {
+    "title": "Other tools",
+    "weight": 24
+  },
+  "content-out/v1.8-docs/installation/uninstall.md": {
+    "title": "Uninstall",
+    "weight": 50
+  },
+  "content-out/v1.8-docs/installation/verify.md": {
+    "title": "Verifying",
+    "weight": 30
+  },
+  "content-out/v1.8-docs/reference/api-docs.md": {
+    "title": "API reference docs",
+    "weight": 9999
+  },
+  "content-out/v1.8-docs/tutorials/README.md": {
+    "title": "Tutorials",
+    "weight": 50
+  },
+  "content-out/v1.8-docs/tutorials/acme/dns-validation.md": {
+    "title": "DNS Validation",
+    "weight": 50
+  },
+  "content-out/v1.8-docs/tutorials/acme/http-validation.md": {
+    "title": "HTTP Validation",
+    "weight": 50
+  },
+  "content-out/v1.8-docs/tutorials/acme/migrating-from-kube-lego.md": {
+    "title": "Migrating from Kube-LEGO",
+    "weight": 10
+  },
+  "content-out/v1.8-docs/tutorials/acme/nginx-ingress.md": {
+    "title": "Securing NGINX-ingress",
+    "weight": 50
+  },
+  "content-out/v1.8-docs/tutorials/acme/pomerium-ingress.md": {
+    "title": "Pomerium Ingress",
+    "weight": 50
+  },
+  "content-out/v1.8-docs/tutorials/backup.md": {
+    "title": "Backup and Restore Resources",
+    "weight": 10
+  },
+  "content-out/v1.8-docs/tutorials/venafi/venafi.md": {
+    "title": "Securing Ingresses with Venafi",
+    "weight": 50
+  },
+  "content-out/v1.8-docs/usage/README.md": {
+    "title": "Usage",
+    "weight": 40
+  },
+  "content-out/v1.8-docs/usage/approver-policy.md": {
+    "title": "Policy for cert-manager certificates",
+    "weight": 600
+  },
+  "content-out/v1.8-docs/usage/certificate.md": {
+    "title": "Certificate Resources",
+    "weight": 10
+  },
+  "content-out/v1.8-docs/usage/cmctl.md": {
+    "title": "cmctl",
+    "weight": 100
+  },
+  "content-out/v1.8-docs/usage/csi.md": {
+    "title": "CSI Driver",
+    "weight": 300
+  },
+  "content-out/v1.8-docs/usage/gateway.md": {
+    "title": "Securing Gateway Resources",
+    "weight": 105
+  },
+  "content-out/v1.8-docs/usage/ingress.md": {
+    "title": "Securing Ingress Resources",
+    "weight": 100
+  },
+  "content-out/v1.8-docs/usage/istio.md": {
+    "title": "Securing Istio Service Mesh",
+    "weight": 200
+  },
+  "content-out/v1.8-docs/usage/kube-csr.md": {
+    "title": "Kubernetes CertificateSigningRequests",
+    "weight": 400
+  },
+  "content-out/v1.8-docs/usage/kubectl-plugin.md": {
+    "title": "Kubectl plugin",
+    "weight": 100
+  },
+  "content-out/v1.8-docs/usage/prometheus-metrics.md": {
     "title": "Prometheus Metrics",
     "weight": 100
   }
